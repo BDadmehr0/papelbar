@@ -5,5 +5,5 @@ saabzstore a e-commerce Django base shop Python 3.12
 
 ``` ps
 venv py -3.12 -m                                             
-venv\Scripts\activate  
+.venv\Scripts\activate  
 ```
