@@ -1,2 +1,5 @@
 .venv
 db.sqlite3
+/store/migrations
+/store/__pycache__
+/saabzstore/__pycache__

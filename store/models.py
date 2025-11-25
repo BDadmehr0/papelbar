@@ -1,24 +1,52 @@
+# store/models.py
 from django.db import models
 from PIL import Image
 import os
 
 def product_image_path(instance, filename):
-    ext = filename.split('.')[-1]  # امتداد فایل
-    filename = f"{instance.id}.{ext}"  # نام‌گذاری بر اساس ID محصول
+    ext = filename.split('.')[-1]
+    # اگر id هنوز تعیین نشده باشد، Django یک نام موقت می‌سازد؛ ما بعد از save با نام جدید جایگزین می‌کنیم
+    filename = f"{instance.id or 'temp'}.{ext}"
     return os.path.join("products", filename)
 
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
+
+    class Meta:
+        verbose_name_plural = "دسته‌بندی‌ها"
+
+    def __str__(self):
+        return self.name
+
+class Brand(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
+
+    class Meta:
+        verbose_name_plural = "برند ها"
+
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=0)
     image = models.ImageField(upload_to=product_image_path, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    inventory = models.PositiveIntegerField(default=0)  # موجودی برای فیلتر "فقط موجود"
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "محصولات"
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        # آیا محصول قبلاً وجود داشته؟
+        # نگه داشتن تصویر قبلی برای حذف اگر آپدیت شد
         old_image = None
         if self.pk:
             try:
@@ -26,23 +54,28 @@ class Product(models.Model):
             except Product.DoesNotExist:
                 pass
 
-        # ذخیره اولیه برای داشتن ID
+        # ذخیره اولیه برای گرفتن ID (اگر ID نداشت)
         super().save(*args, **kwargs)
 
-        # اگر عکس جدید آپلود شده و عکس قبلی وجود دارد → پاک شود
+        # اگر عکس قبلی وجود داشت و با عکس جدید فرق می‌کرد حذفش کن
         if old_image and old_image != self.image:
-            if os.path.isfile(old_image.path):
-                os.remove(old_image.path)
+            try:
+                if old_image.path and os.path.isfile(old_image.path):
+                    os.remove(old_image.path)
+            except Exception:
+                pass
 
-        # اگر عکس ندارد، ادامه نده
+        # اگر هیچ عکسی نیست، تمام
         if not self.image:
             return
 
-        # مسیر عکس جدید
+        # اطمینان از نام‌گذاری بر اساس ID (در صورت استفاده از نام temp در upload_to)
         img_path = self.image.path
-        img = Image.open(img_path)
+        try:
+            img = Image.open(img_path)
+        except Exception:
+            return
 
-        # Resize
         max_width = 800
         if img.width > max_width:
             ratio = max_width / float(img.width)
@@ -50,10 +83,11 @@ class Product(models.Model):
             img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
 
         # ذخیره مجدد عکس
-        img.save(img_path)
-
-
-
+        try:
+            img.save(img_path)
+        except Exception:
+            pass
+    
 
 class Order(models.Model):
     customer_name = models.CharField(max_length=200)
@@ -63,6 +97,9 @@ class Order(models.Model):
     products = models.ManyToManyField(Product)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50, default='pending')
+
+    class Meta:
+        verbose_name_plural = "سفارش ها"
 
     def __str__(self):
         return f"Order {self.id} - {self.customer_name}"

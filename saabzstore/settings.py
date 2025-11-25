@@ -126,3 +126,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = '/media/'          # مسیر URL که عکس‌ها از طریق مرورگر قابل دسترسی باشه
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # مسیر فیزیکی ذخیره عکس‌ها
+
+USE_L10N = True
+LANGUAGE_CODE = "fa"
