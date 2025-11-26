@@ -97,9 +97,6 @@
           </div>
 
           <div class="flex space-x-3 space-x-reverse">
-            <button id="applyFiltersBtn" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition duration-300">
-              اعمال فیلتر
-            </button>
             <button id="resetFiltersBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition duration-300" type="button">
               بازنشانی
             </button>
@@ -147,7 +144,6 @@
 (function(){
   const apiUrl = "{% url 'api_products' %}";
   const productsContainer = document.getElementById('productsContainer');
-  const applyBtn = document.getElementById('applyFiltersBtn');
   const resetBtn = document.getElementById('resetFiltersBtn');
   const priceRange = document.getElementById('priceRange');
   const displayMaxPrice = document.getElementById('displayMaxPrice');
@@ -166,11 +162,6 @@
   // مقداردهی اولیه نمایش قیمت
   displayMinPrice.textContent = formatFa(minPriceInput.value) + ' تومان';
   displayMaxPrice.textContent = formatFa(maxPriceInput.value) + ' تومان';
-
-  priceRange.addEventListener('input', function() {
-    maxPriceInput.value = this.value;
-    displayMaxPrice.textContent = formatFa(this.value) + ' تومان';
-  });
 
   // آماده‌سازی پارامترها برای API
   function buildParams(page=1) {
@@ -235,7 +226,6 @@
       });
   }
 
-
   // رندر صفحه‌بندی
   function renderPagination(pagination) {
     paginationDiv.innerHTML = '';
@@ -251,9 +241,8 @@
       return btn;
     };
 
-    // قبلی
     paginationDiv.appendChild(createBtn('قبلی', Math.max(1, pagination.page - 1), !pagination.has_prev));
-    // صفحات میانی (حداکثر 7 دکمه)
+    
     const total = pagination.total_pages;
     const current = pagination.page;
     let start = Math.max(1, current - 3);
@@ -263,7 +252,6 @@
     for (let i = start; i <= end; i++) {
       paginationDiv.appendChild(createBtn(i, i, false, i===current));
     }
-    // بعدی
     paginationDiv.appendChild(createBtn('بعدی', Math.min(total, pagination.page + 1), !pagination.has_next));
   }
 
@@ -284,9 +272,15 @@
     }
   }
 
-  // اعمال فیلتر
-  applyBtn.addEventListener('click', e => {
-    e.preventDefault();
+  // لایو فیلتر: هر تغییر در فیلترها باعث loadProducts می‌شود
+  document.querySelectorAll('.filter-category, .filter-brand').forEach(cb => {
+    cb.addEventListener('change', () => loadProducts(1, true));
+  });
+  inStockCheckbox.addEventListener('change', () => loadProducts(1, true));
+  sortSelect.addEventListener('change', () => loadProducts(1, true));
+  priceRange.addEventListener('input', () => {
+    maxPriceInput.value = priceRange.value;
+    displayMaxPrice.textContent = formatFa(priceRange.value) + ' تومان';
     loadProducts(1, true);
   });
 
@@ -302,7 +296,6 @@
     sortSelect.value = '';
     loadProducts(1, true);
   });
-
 
   // بارگذاری اولیه
   loadProducts(1, false);
