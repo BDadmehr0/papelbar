@@ -1,20 +1,24 @@
 # store/models.py
 import os
-
 from django.db import models
+from django.utils.text import slugify
 from PIL import Image
 
-
+# -----------------------------
+# مسیر ذخیره تصویر محصول
+# -----------------------------
 def product_image_path(instance, filename):
     ext = filename.split(".")[-1]
-    # اگر id هنوز تعیین نشده باشد، Django یک نام موقت می‌سازد؛ ما بعد از save با نام جدید جایگزین می‌کنیم
     filename = f"{instance.id or 'temp'}.{ext}"
     return os.path.join("products", filename)
 
 
+# -----------------------------
+# مدل دسته‌بندی
+# -----------------------------
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=120, unique=True, blank=True)
 
     class Meta:
         verbose_name_plural = "دسته‌بندی‌ها"
@@ -22,10 +26,24 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name, allow_unicode=True)
+            slug = base_slug
+            counter = 1
+            while Category.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
+
+# -----------------------------
+# مدل برند
+# -----------------------------
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=120, unique=True, blank=True)
 
     class Meta:
         verbose_name_plural = "برند ها"
@@ -33,23 +51,34 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name, allow_unicode=True)
+            slug = base_slug
+            counter = 1
+            while Brand.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
+
+# -----------------------------
+# مدل محصول
+# -----------------------------
 class Product(models.Model):
     name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=0)
     image = models.ImageField(upload_to=product_image_path, blank=True, null=True)
     category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="products",
+        Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="products"
     )
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name="products"
     )
-    inventory = models.PositiveIntegerField(default=0)  # موجودی برای فیلتر "فقط موجود"
+    inventory = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -59,7 +88,17 @@ class Product(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # نگه داشتن تصویر قبلی برای حذف اگر آپدیت شد
+        # ساخت slug خودکار
+        if not self.slug:
+            base_slug = slugify(self.name, allow_unicode=True)
+            slug = base_slug
+            counter = 1
+            while Product.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+
+        # ذخیره اولیه برای گرفتن ID
         old_image = None
         if self.pk:
             try:
@@ -67,10 +106,9 @@ class Product(models.Model):
             except Product.DoesNotExist:
                 pass
 
-        # ذخیره اولیه برای گرفتن ID (اگر ID نداشت)
         super().save(*args, **kwargs)
 
-        # اگر عکس قبلی وجود داشت و با عکس جدید فرق می‌کرد حذفش کن
+        # حذف عکس قبلی در صورت آپدیت
         if old_image and old_image != self.image:
             try:
                 if old_image.path and os.path.isfile(old_image.path):
@@ -78,11 +116,10 @@ class Product(models.Model):
             except Exception:
                 pass
 
-        # اگر هیچ عکسی نیست، تمام
         if not self.image:
             return
 
-        # اطمینان از نام‌گذاری بر اساس ID (در صورت استفاده از نام temp در upload_to)
+        # تغییر اندازه تصویر
         img_path = self.image.path
         try:
             img = Image.open(img_path)
@@ -95,13 +132,15 @@ class Product(models.Model):
             new_height = int(float(img.height) * ratio)
             img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
 
-        # ذخیره مجدد عکس
         try:
             img.save(img_path)
         except Exception:
             pass
 
 
+# -----------------------------
+# مدل سفارش
+# -----------------------------
 class Order(models.Model):
     customer_name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -110,6 +149,7 @@ class Order(models.Model):
     products = models.ManyToManyField(Product)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "سفارش ها"

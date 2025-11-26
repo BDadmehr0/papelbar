@@ -31,10 +31,23 @@ def store(request):
         },
     )
 
+def product_detail(request, id, slug):
+    """
+    نمایش جزئیات یک محصول بر اساس id و slug
+    """
+    product = get_object_or_404(Product, id=id, slug=slug)
 
-def product_detail(request, id):
-    product = get_object_or_404(Product, id=id)
-    return render(request, "store/product_detail.html", {"product": product})
+    # محصولات مرتبط
+    related_products = Product.objects.filter(
+        category=product.category
+    ).exclude(id=product.id)[:6] if product.category else []
+
+    context = {
+        'product': product,
+        'related_products': related_products,
+    }
+    return render(request, 'store/product_detail.html', context)
+
 
 
 def cart(request):
@@ -124,6 +137,7 @@ def api_products(request):
             {
                 "id": product.id,
                 "name": product.name,
+                "slug": product.slug,
                 "description": product.description[:200],
                 "price": str(product.price),
                 "image": product.image.url if product.image else None,

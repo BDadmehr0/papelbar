@@ -111,26 +111,29 @@
       <section class="md:w-3/4">
         <div id="productsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {% for product in products %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover-lift product-card" data-id="{{ product.id }}">
-              <div class="relative">
-                {% if product.image %}
-                  <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
-                {% else %}
-                  <img src="{% static 'images/default.png' %}" alt="No image" class="w-full h-48 object-cover">
-                {% endif %}
-              </div>
-              <div class="p-4">
-                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ product.name }}</h3>
-                <p class="text-gray-600 text-sm mb-3">{{ product.description|truncatechars:30 }}</p>
-                <div class="flex justify-between items-center">
-                  <span class="text-lg font-bold text-emerald-600">{{ product.price|toman }} تومان</span>
-                  <button class="bg-emerald-600 text-white px-3 py-1 rounded-lg hover:bg-emerald-700 transition duration-300 text-sm">
-                    <i class="fas fa-cart-plus ml-1"></i> افزودن
-                  </button>
+            <a href="{% url 'product_detail' product.id product.slug %}" class="block group">
+              <div class="bg-white rounded-xl shadow-md overflow-hidden hover-lift product-card" data-id="{{ product.id }}">
+                <div class="relative">
+                  {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                  {% else %}
+                    <img src="{% static 'images/default.png' %}" alt="No image" class="w-full h-48 object-cover">
+                  {% endif %}
+                </div>
+                <div class="p-4">
+                  <h3 class="text-lg font-bold text-gray-800 mb-2">{{ product.name }}</h3>
+                  <p class="text-gray-600 text-sm mb-3">{{ product.description|truncatechars:30 }}</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-emerald-600">{{ product.price|toman }} تومان</span>
+                    <button class="bg-emerald-600 text-white px-3 py-1 rounded-lg hover:bg-emerald-700 transition duration-300 text-sm">
+                      <i class="fas fa-cart-plus ml-1"></i> افزودن
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           {% endfor %}
+
         </div>
 
         <!-- ناحیهٔ صفحه‌بندی -->
@@ -200,35 +203,38 @@
 
   // رندر محصولات
   function renderProducts(products) {
-    productsContainer.innerHTML = '';
-    if (!products.length) {
-      productsContainer.innerHTML = '<p class="text-gray-600 text-center col-span-full">هیچ محصولی یافت نشد.</p>';
-      return;
-    }
-    products.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover-lift product-card';
-      card.setAttribute('data-id', p.id);
+      productsContainer.innerHTML = '';
+      if (!products.length) {
+        productsContainer.innerHTML = '<p class="text-gray-600 text-center col-span-full">هیچ محصولی یافت نشد.</p>';
+        return;
+      }
+      products.forEach(p => {
+        const card = document.createElement('a');  // از div به a تغییر دادیم
+        card.href = `/product/${p.id}/${p.slug}/`; // لینک جزئیات محصول
+        card.className = 'block group';
 
-      const imageUrl = p.image ? p.image : '{% static "images/default.png" %}';
-      card.innerHTML = `
-        <div class="relative">
-          <img src="${imageUrl}" alt="${escapeHtml(p.name)}" class="w-full h-48 object-cover">
-        </div>
-        <div class="p-4">
-          <h3 class="text-lg font-bold text-gray-800 mb-2">${escapeHtml(p.name)}</h3>
-          <p class="text-gray-600 text-sm mb-3">${escapeHtml(p.description || '').slice(0,70)}</p>
-          <div class="flex justify-between items-center">
-            <span class="text-lg font-bold text-emerald-600">${Number(p.price).toLocaleString('fa-IR')} تومان</span>
-            <button class="bg-emerald-600 text-white px-3 py-1 rounded-lg hover:bg-emerald-700 transition duration-300 text-sm">
-              <i class="fas fa-cart-plus ml-1"></i> افزودن
-            </button>
+        const imageUrl = p.image ? p.image : '{% static "images/default.png" %}';
+        card.innerHTML = `
+          <div class="bg-white rounded-xl shadow-md overflow-hidden hover-lift product-card" data-id="${p.id}">
+            <div class="relative">
+              <img src="${imageUrl}" alt="${escapeHtml(p.name)}" class="w-full h-48 object-cover">
+            </div>
+            <div class="p-4">
+              <h3 class="text-lg font-bold text-gray-800 mb-2">${escapeHtml(p.name)}</h3>
+              <p class="text-gray-600 text-sm mb-3">${escapeHtml(p.description || '').slice(0,70)}</p>
+              <div class="flex justify-between items-center">
+                <span class="text-lg font-bold text-emerald-600">${Number(p.price).toLocaleString('fa-IR')} تومان</span>
+                <button class="bg-emerald-600 text-white px-3 py-1 rounded-lg hover:bg-emerald-700 transition duration-300 text-sm">
+                  <i class="fas fa-cart-plus ml-1"></i> افزودن
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      `;
-      productsContainer.appendChild(card);
-    });
+        `;
+        productsContainer.appendChild(card);
+      });
   }
+
 
   // رندر صفحه‌بندی
   function renderPagination(pagination) {

@@ -1,0 +1,73 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% load price_filters %}
+
+{% block content %}
+<main class="py-8">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- Product Images -->
+      <div class="md:w-1/2 bg-white rounded-xl shadow-lg p-4">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover rounded-lg">
+        {% else %}
+          <img src="{% static 'images/default.png' %}" alt="No image" class="w-full h-96 object-cover rounded-lg">
+        {% endif %}
+      </div>
+
+      <!-- Product Details -->
+      <div class="md:w-1/2 flex flex-col justify-between bg-white rounded-xl shadow-lg p-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-3">{{ product.name }}</h1>
+          <p class="text-gray-600 mb-4">{{ product.description }}</p>
+
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-lg text-gray-700">دسته‌بندی:</span>
+            {% if product.category %}
+              <span class="text-emerald-600 font-semibold">{{ product.category.name }}</span>
+            {% else %}
+              <span class="text-gray-500">ندارد</span>
+            {% endif %}
+          </div>
+
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-lg text-gray-700">برند:</span>
+            {% if product.brand %}
+              <span class="text-emerald-600 font-semibold">{{ product.brand.name }}</span>
+            {% else %}
+              <span class="text-gray-500">ندارد</span>
+            {% endif %}
+          </div>
+
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-lg text-gray-700">قیمت:</span>
+            <span class="text-2xl font-bold text-emerald-600">{{ product.price|toman }} تومان</span>
+          </div>
+
+          <div class="flex items-center gap-4 mb-6">
+            <span class="text-lg text-gray-700">موجودی:</span>
+            {% if product.inventory > 0 %}
+              <span class="text-green-600 font-semibold">در انبار موجود است ({{ product.inventory }})</span>
+            {% else %}
+              <span class="text-red-600 font-semibold">ناموجود</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Add to Cart -->
+        <div class="mt-6">
+          {% if product.inventory > 0 %}
+            <button class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition duration-300 flex items-center">
+              <i class="fas fa-cart-plus ml-2"></i> افزودن به سبد خرید
+            </button>
+          {% else %}
+            <button class="bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed" disabled>
+              ناموجود
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
