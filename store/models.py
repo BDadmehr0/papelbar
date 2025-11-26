@@ -1,5 +1,6 @@
 # store/models.py
 import os
+
 from django.db import models
 from django.utils.text import slugify
 from PIL import Image

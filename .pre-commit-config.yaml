@@ -5,6 +5,7 @@ repos:
     rev: '25.11.0'
     hooks:
       - id: black
+        exclude: .env
         language_version: python3.12
 
   # Python import sorter
@@ -12,6 +13,9 @@ repos:
     rev: 7.0.0
     hooks:
       - id: isort
+        exclude: |
+          ^.env/
+          ^migrations/
         language_version: python3.12
 
   # Django HTML templates formatter
