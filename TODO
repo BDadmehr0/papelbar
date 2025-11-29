@@ -6,6 +6,14 @@
 [+] pre-commit Setup
 [+] Special Product ?
 [+] Improve header and footer and index
+[+] css clean
+[+] Category Create
+[+] JS clean
+[+] product slug persian error
+[+] slug redirct update when edit
+[+] product des store.html word limit not working
+[+] Store product title limit
+[] Product comments & stars create
 [] product_detail.html ui/ux Improve(deepseek)
     - [+] Breadcrumb
     - [+] Javascript's
@@ -25,10 +33,5 @@
 [] Zarinpal payment
 [] Create Email (papelbar.ir@gmail.com)
 [] sortSelect backend ajax fix (live ajax)
-[+] css clean
-[] Category Create
+
 [] index.html special product slider and more prduct can add more 3+
-[+] JS clean
-[+] product slug persian error
-[+] slug redirct update when edit
-[] product des store.html word limit not working
