@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>داشبورد کاربری</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; direction: rtl; }
+  .tabs { display: flex; margin-bottom: 20px; }
+  .tab { padding: 10px 20px; border: 1px solid #ccc; cursor: pointer; margin-left: 5px; border-bottom: none; }
+  .tab.active { background-color: #eee; font-weight: bold; }
+  .tab-content { border: 1px solid #ccc; padding: 20px; }
+  img { border-radius: 5px; }
+  button.logout { background-color: #f44336; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<h1>داشبورد کاربری</h1>
+
+<div>
+  <button class="logout" onclick="window.location.href='{% url 'logout' %}'">خروج</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="detail">جزئیات حساب</div>
+  <div class="tab" data-tab="settings">تنظیمات</div>
+</div>
+
+<div class="tab-content" id="detail">
+  <p><strong>شماره موبایل:</strong> {{ user.phone_number }}</p>
+  <p><strong>نام:</strong> {{ user.name }}</p>
+  <p>
+    <strong>تصویر پروفایل:</strong><br>
+    {% if user.profile_image %}
+      <img src="{{ user.profile_image.url }}" width="120" alt="Profile">
+    {% else %}
+      <span>تصویری ثبت نشده است</span>
+    {% endif %}
+  </p>
+</div>
+
+<div class="tab-content" id="settings" style="display:none;">
+  <h2>ویرایش اطلاعات</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">ذخیره تغییرات</button>
+  </form>
+</div>
+
+<script>
+$(document).ready(function(){
+  $('.tab').click(function(){
+    var tab_id = $(this).data('tab');
+    
+    $('.tab').removeClass('active');
+    $(this).addClass('active');
+    
+    $('.tab-content').hide();
+    $('#' + tab_id).show();
+  });
+});
+</script>
+
+</body>
+</html>

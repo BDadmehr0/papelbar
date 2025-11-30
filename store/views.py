@@ -1,12 +1,12 @@
 # store/views.py
+import random
+
 from django.core.paginator import EmptyPage, Paginator
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.db.models import Q
 
 from .models import Brand, Category, Product
-
-import random
 
 
 # ---------------------------
@@ -54,12 +54,13 @@ def store(request):
     )
 
 
-
 # ---------------------------
 # جزئیات محصول
 # ---------------------------
 from django.shortcuts import get_object_or_404, redirect, render
+
 from .models import Product, ProductSlugHistory
+
 
 def product_detail(request, id, slug):
     # گرفتن محصول بر اساس id
@@ -67,13 +68,15 @@ def product_detail(request, id, slug):
 
     # اگر slug تغییر کرده باشد → ریدایرکت 301 به slug جدید
     if product.slug != slug:
-        return redirect('product_detail', id=product.id, slug=product.slug, permanent=True)
+        return redirect(
+            "product_detail", id=product.id, slug=product.slug, permanent=True
+        )
 
     # نمایش محصولات مرتبط
     related_products = (
-        Product.objects.filter(category=product.category)
-        .exclude(id=product.id)[:6]
-        if product.category else []
+        Product.objects.filter(category=product.category).exclude(id=product.id)[:6]
+        if product.category
+        else []
     )
 
     return render(
@@ -99,6 +102,7 @@ def checkout(request):
 # ============================================================
 from django.core.cache import cache
 
+
 def api_products(request):
     qs = Product.objects.all()
     search = request.GET.get("q", "").strip()
@@ -120,11 +124,11 @@ def api_products(request):
     # --- فیلترها همانطور که قبلا بود ---
     if search:
         qs = qs.filter(
-            Q(name__icontains=search) |
-            Q(description__icontains=search) |
-            Q(brand__name__icontains=search) |
-            Q(category__name__icontains=search) |
-            Q(slug__icontains=search)
+            Q(name__icontains=search)
+            | Q(description__icontains=search)
+            | Q(brand__name__icontains=search)
+            | Q(category__name__icontains=search)
+            | Q(slug__icontains=search)
         )
     if categories:
         qs = qs.filter(category__id__in=[c for c in categories.split(",")])
@@ -188,7 +192,6 @@ def api_suggest(request):
         products = Product.objects.filter(name__icontains=q)[:10]
         suggestions = [p.name for p in products]
     return JsonResponse({"suggestions": suggestions})
-
 
 
 # ---------------------------

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "store",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -129,4 +130,10 @@ MEDIA_URL = "/media/"  # مسیر URL که عکس‌ها از طریق مرور�
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # مسیر فیزیکی ذخیره عکس‌ها
 
 USE_L10N = True
-LANGUAGE_CODE = "fa"
+# LANGUAGE_CODE = "fa"
+LOGIN_URL = "/auth/"
+LOGIN_REDIRECT_URL = "/dashboard/"
+AUTH_USER_MODEL = "accounts.User"
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]

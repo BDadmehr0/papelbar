@@ -1,9 +1,11 @@
 # store/models.py
 import os
 import re
+
 from django.db import models
 from django.utils.text import slugify
 from PIL import Image
+
 
 # -----------------------------
 # مسیر ذخیره تصویر محصول
@@ -20,7 +22,7 @@ def product_image_path(instance, filename):
 def clean_slug(name):
     slug = slugify(name, allow_unicode=True)
     slug = re.sub(r"[^\w\-]", "", slug)  # فقط حروف، اعداد، _ و - باقی می‌ماند
-    slug = re.sub(r"[-]+", "-", slug)    # جلوگیری از چند خط فاصله پشت سر هم
+    slug = re.sub(r"[-]+", "-", slug)  # جلوگیری از چند خط فاصله پشت سر هم
     return slug.strip("-")
 
 
@@ -79,7 +81,9 @@ class Brand(models.Model):
 # تاریخچه Slug محصولات
 # -----------------------------
 class ProductSlugHistory(models.Model):
-    product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name='slug_history')
+    product = models.ForeignKey(
+        "Product", on_delete=models.CASCADE, related_name="slug_history"
+    )
     old_slug = models.SlugField(max_length=220, allow_unicode=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -197,7 +201,9 @@ class Order(models.Model):
 # مدل Variant
 # -----------------------------
 class Variant(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="variants"
+    )
     name = models.CharField(max_length=120)
     price = models.PositiveIntegerField()
     inventory = models.PositiveIntegerField(default=0)
@@ -210,7 +216,9 @@ class Variant(models.Model):
 # مدل Specification
 # -----------------------------
 class Specification(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="specifications")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="specifications"
+    )
     name = models.CharField(max_length=120)
     value = models.CharField(max_length=255)
 

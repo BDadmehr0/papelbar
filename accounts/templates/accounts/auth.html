@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Login / Register</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+  .step { display: none; }
+  .step.active { display: block; }
+  .error { color: red; }
+</style>
+</head>
+<body>
+
+<h2>ورود / ثبت‌نام</h2>
+
+<div id="auth-form">
+
+  <!-- مرحله 1 -->
+  <div class="step step-phone active">
+    <label>شماره موبایل:</label>
+    <input type="text" id="phone_number">
+    <button id="send_otp_btn">دریافت OTP</button>
+    <p class="error" id="phone_error"></p>
+  </div>
+
+  <!-- مرحله 2 -->
+  <div class="step step-otp">
+    <label>کد OTP:</label>
+    <input type="text" id="otp_code">
+    <button id="verify_otp_btn">تایید OTP</button>
+    <p class="error" id="otp_error"></p>
+  </div>
+
+  <!-- مرحله 3 -->
+  <div class="step step-password">
+    <label>رمز عبور:</label>
+    <input type="password" id="password">
+    <button id="set_password_btn">ثبت رمز</button>
+    <p class="error" id="password_error"></p>
+  </div>
+
+</div>
+
+<script>
+function getCSRF() {
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken=')).split('=')[1];
+}
+
+function hideAllSteps() {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+}
+
+// مرحله 1: ارسال شماره
+document.getElementById("send_otp_btn").onclick = async function() {
+    const phone = document.getElementById("phone_number").value;
+    const res = await fetch("{% url 'api_send_otp' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ phone_number: phone })
+    });
+    const data = await res.json();
+
+    hideAllSteps();
+
+    if(data.success){
+        if(data.skip_otp){
+            // کاربر رمز دارد → مستقیم مرحله پسورد
+            document.querySelector('.step-password').classList.add('active');
+        } else {
+            // مرحله OTP
+            document.querySelector('.step-otp').classList.add('active');
+        }
+    } else {
+        document.getElementById("phone_error").innerText = data.error;
+    }
+};
+
+// مرحله 2: تایید OTP
+document.getElementById("verify_otp_btn").onclick = async function() {
+    const otp = document.getElementById("otp_code").value;
+    const res = await fetch("{% url 'api_verify_otp' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ code: otp })
+    });
+    const data = await res.json();
+
+    hideAllSteps();
+
+    if(data.success){
+        if(data.new_user){
+            document.querySelector('.step-password').classList.add('active');
+        } else {
+            window.location.href = "/dashboard/";
+        }
+    } else {
+        document.getElementById("otp_error").innerText = data.error;
+    }
+};
+
+// مرحله 3: ثبت پسورد
+document.getElementById("set_password_btn").onclick = async function() {
+    const password = document.getElementById("password").value;
+    const res = await fetch("{% url 'api_set_password' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF() },
+        body: JSON.stringify({ password: password })
+    });
+    const data = await res.json();
+    if(data.success){
+        window.location.href = "/dashboard/";
+    } else {
+        document.getElementById("password_error").innerText = data.error;
+    }
+};
+</script>
+
+
+</body>
+</html>

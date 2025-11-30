@@ -13,6 +13,11 @@
 [+] slug redirct update when edit
 [+] product des store.html word limit not working
 [+] Store product title limit
+[+] Create account section
+    [+] Dashboard
+    [+] auth (otp, password, phone)
+    [] connect otp service sms.ir
+    [] improve auth.html, dashboard.html ui/ux
 [] Product comments & stars create
 [] Price filter maximum price get form db
 [] product_detail.html ui/ux Improve(deepseek)
@@ -24,15 +29,14 @@
     - [] Cart
     - [] stars
     - [] tab and some conetent center div
-[] sotre.html fix & add
-    - [] Product Image view have bug Fix it!
-    - [] avabile
-    - [] rate
-    - [] change default desc
-[] Improve admin panel ui ux
-[] Create account section
+[+] sotre.html fix & add
+    - [+] Product Image view have bug Fix it!
+    - [+] avabile
+    - [+] rate
+    - [+] change default desc
 [] Zarinpal payment
 [] Create Email (papelbar.ir@gmail.com)
-[] sortSelect backend ajax fix (live ajax)
-
+[+] sortSelect backend ajax fix (live ajax)
 [] index.html special product slider and more prduct can add more 3+
+[] Improve admin panel ui ux (custom dashboard)
+[] clean code python file
