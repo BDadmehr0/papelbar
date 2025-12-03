@@ -1,0 +1,62 @@
+<form id="filtersForm" onsubmit="return false;">
+  <div class="mb-6">
+    <h3 class="font-bold text-gray-700 mb-3 text-lg">دسته‌بندی</h3>
+    <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
+      {% for cat in categories %}
+        <div class="flex items-center hover:bg-gray-50 rounded-lg p-2 transition">
+          <input type="checkbox" class="filter-category rounded text-emerald-600 focus:ring-emerald-500" value="{{ cat.id }}" id="cat_{{ cat.id }}">
+          <label for="cat_{{ cat.id }}" class="mr-2 text-gray-700 cursor-pointer hover:text-emerald-600 transition text-sm">{{ cat.name }}</label>
+        </div>
+      {% empty %}
+        <p class="text-gray-500 text-sm">دسته‌ای موجود نیست.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <h3 class="font-bold text-gray-700 mb-3 text-lg">برند</h3>
+    <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
+      {% for br in brands %}
+        <div class="flex items-center hover:bg-gray-50 rounded-lg p-2 transition">
+          <input type="checkbox" class="filter-brand rounded text-emerald-600 focus:ring-emerald-500" value="{{ br.id }}" id="brand_{{ br.id }}">
+          <label for="brand_{{ br.id }}" class="mr-2 text-gray-700 cursor-pointer hover:text-emerald-600 transition text-sm">{{ br.name }}</label>
+        </div>
+      {% empty %}
+        <p class="text-gray-500 text-sm">برندی موجود نیست.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <h3 class="font-bold text-gray-700 mb-3 text-lg">محدوده قیمت</h3>
+    <div class="space-y-4">
+      <div class="flex justify-between text-sm text-gray-600">
+        <span id="displayMinPrice">۰ تومان</span>
+        <span id="displayMaxPrice">۵,۰۰۰,۰۰۰ تومان</span>
+      </div>
+      <div class="relative pt-4">
+        <input type="range" min="0" max="5000000" value="5000000" step="10000" 
+               class="price-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+               id="priceRange">
+      </div>
+      <input type="hidden" id="minPriceInput" value="0">
+      <input type="hidden" id="maxPriceInput" value="5000000">
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <h3 class="font-bold text-gray-700 mb-3 text-lg">وضعیت موجودی</h3>
+    <div class="space-y-2">
+      <div class="flex items-center hover:bg-gray-50 rounded-lg p-2 transition">
+        <input type="checkbox" id="inStockCheckbox" class="rounded text-emerald-600 focus:ring-emerald-500">
+        <label for="inStockCheckbox" class="mr-2 text-gray-700 cursor-pointer hover:text-emerald-600 transition text-sm">فقط کالاهای موجود</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex space-x-3 space-x-reverse">
+    <button id="resetFiltersBtn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-300 font-semibold text-sm" type="button">
+      بازنشانی
+    </button>
+  </div>
+</form>
